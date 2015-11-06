@@ -24,9 +24,12 @@
 import os
 import pyglet
 import json
+import random
 
 LINE_SEGMENT_THICKNESS = 16
 ORIGIN = 0
+PIECE_TOKEN = '0'
+GAME_FONT = "Times New Roman"
 
 class Serializable:
 
@@ -81,31 +84,42 @@ if __name__ == '__main__':
 					 app.width / 2 - LINE_SEGMENT_THICKNESS, app.height, app.width / 2, app.height, app.width / 2, ORIGIN,
 					 app.width / 2 - LINE_SEGMENT_THICKNESS, app.height, app.width / 2, ORIGIN, app.width / 2 - LINE_SEGMENT_THICKNESS, ORIGIN,
 					 ORIGIN, app.height, app.width / 2, app.height, app.width / 2, app.height - LINE_SEGMENT_THICKNESS,
-					 ORIGIN, app.height, ORIGIN, app.height - LINE_SEGMENT_THICKNESS, app.width / 2, app.height - LINE_SEGMENT_THICKNESS))
+					 ORIGIN, app.height, ORIGIN, app.height - LINE_SEGMENT_THICKNESS, app.width / 2, app.height - LINE_SEGMENT_THICKNESS
+					 ))
 		)
 
 	def draw_texts():
 		pyglet.text.Label(
 			"Ericson's PyTetris - 2015",
-			font_name = "Times New Roman",
-			font_size=16,
+			font_name = GAME_FONT,
+			font_size=LINE_SEGMENT_THICKNESS,
 			color = (255, 255, 255, 255),
 			x = app.width - 184, y = app.height - LINE_SEGMENT_THICKNESS,
 			anchor_x = "center", anchor_y = "center"
 		).draw()
+		
+	def fetch_elemental_piece(_x, _y):
+		return (pyglet.text.Label(
+			PIECE_TOKEN*2,
+			font_name=GAME_FONT,
+			font_size=LINE_SEGMENT_THICKNESS,
+			color=(255, 0, 0, 255),
+			x=_x+LINE_SEGMENT_THICKNESS*2, y=_y+app.height-LINE_SEGMENT_THICKNESS*2-n,
+			anchor_x = "center", anchor_y = "center"
+		) for n in range(0, LINE_SEGMENT_THICKNESS*2, LINE_SEGMENT_THICKNESS))
 
-	labels = [pyglet.text.Label("0"*8,
-							  font_name = "Times New Roman",
-							  font_size=16,
-							  color = (255, 0, 0, 255),
-							  x = app.width // 2, y = app.height // 2 - n,
-							  anchor_x = "center", anchor_y = "center") for n in range(0, 128, 16)]
-							  
+	def fetch_master_piece(name, x, y):
+		if name == 'I':
+			return (fetch_elemental_piece(x+LINE_SEGMENT_THICKNESS*n/1.5, y) for n in range(0, 8, 2))
+
 	@app.event
 	def on_draw():
 		app.clear()
 		#[label.draw() for label in labels]
 		draw_game_area()
 		draw_texts()
+		for master_piece in fetch_master_piece('I', 4, 0):
+			for elemental_piece in master_piece:
+				elemental_piece.draw()
 	
 	pyglet.app.run()
